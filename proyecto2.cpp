@@ -1,8 +1,10 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <vector>
 #include <unordered_map>
+#include <vector>
+#include <list>
+#include <algorithm>
 
 using namespace std;
 
@@ -65,6 +67,30 @@ void carciudades(const string& ciudades, unordered_map<string, int>& mapaCiudade
     archivo.close();
 }
 
+class Grafo {
+public:
+    void agregarArista(const Ciudad& ciudad1, const Ciudad& ciudad2);
+    void imprimirGrafo();
+
+private:
+    unordered_map<string, list<string>> listaAdyacencia;
+};
+
+void Grafo::agregarArista(const Ciudad& ciudad1, const Ciudad& ciudad2) {
+    listaAdyacencia[ciudad1.nombre].push_back(ciudad2.nombre);
+    listaAdyacencia[ciudad2.nombre].push_back(ciudad1.nombre);
+}
+
+void Grafo::imprimirGrafo() {
+    for (const auto& ciudad : listaAdyacencia) {
+        cout << "Ciudad: " << ciudad.first << " -> Conectada con: ";
+        for (const auto& vecina : ciudad.second) {
+            cout << vecina << " ";
+        }
+        cout << endl;
+    }
+}
+
 void cargarciudad(){
   unordered_map<string, int> mapaCiudades;
 
@@ -79,9 +105,18 @@ void cargarciudad(){
     cout << "Lista de Ciudades:" << endl;
     for (const auto& ciudad : ciu) {
     cout << "Nombre: " << ciudad.nombre << ", Índice: " << mapaCiudades[ciudad.nombre] << endl; 
+
+    Grafo grafo;
+
+    // Imprimir el grafo
+    grafo.imprimirGrafo();
+
+    
+}
 }
 
-}
+
+
 
 
 
@@ -134,6 +169,71 @@ void cargarYValidarGuardianes(const string& guardianes, const unordered_map<stri
     archivo.close();
 }
 
+struct TreeNode {
+    Guardian guardian;
+    TreeNode* left;
+    TreeNode* right;
+
+    TreeNode(const Guardian& g) : guardian(g), left(nullptr), right(nullptr) {}
+};
+
+class GuardianRankingTree {
+public:
+    // Funciones del árbol
+    void insertarGuardian(const Guardian& guardian);
+    void imprimirRanking();
+
+private:
+    // Funciones auxiliares
+    void insertarGuardianRec(TreeNode*& root, const Guardian& guardian);
+    void imprimirRankingRec(TreeNode* root, int& contador);
+    void liberarMemoria(TreeNode* root);
+
+    // Raíz del árbol
+    TreeNode* raiz = nullptr;
+};
+
+void GuardianRankingTree::insertarGuardian(const Guardian& guardian) {
+    insertarGuardianRec(raiz, guardian);
+}
+
+void GuardianRankingTree::insertarGuardianRec(TreeNode*& root, const Guardian& guardian) {
+    if (root == nullptr) {
+        root = new TreeNode(guardian);
+    } else if (guardian.PowerLevel <= root->guardian.PowerLevel) {
+        insertarGuardianRec(root->left, guardian);
+    } else {
+        insertarGuardianRec(root->right, guardian);
+    }
+}
+
+void GuardianRankingTree::imprimirRanking() {
+    int contador = 1; // Contador para el ranking
+    imprimirRankingRec(raiz, contador);
+}
+
+void GuardianRankingTree::imprimirRankingRec(TreeNode* root, int& contador) {
+    if (root != nullptr) {
+        // Imprimir nodos en orden inverso para tener el ranking desde el mayor al menor
+        imprimirRankingRec(root->right, contador);
+        cout << "Ranking #" << contador << ": " << root->guardian.name << " (Poder: " << root->guardian.PowerLevel << ")" << endl;
+        contador++;
+        imprimirRankingRec(root->left, contador);
+    }
+}
+
+void GuardianRankingTree::liberarMemoria(TreeNode* root) {
+    if (root != nullptr) {
+        liberarMemoria(root->left);
+        liberarMemoria(root->right);
+        delete root;
+    }
+}
+
+void cargarguardian(){
+
+
+}
 
 
 
@@ -184,3 +284,5 @@ int main() {
 
     return 0;
 }
+
+
